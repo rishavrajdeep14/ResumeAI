@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Screening</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">ResumeAI</div>
+        <div class="nav-text">AI Resume Screening & Job Recommendation</div>
+    </nav>
+
+    <main class="container">
+        <section class="hero">
+            <div>
+                <p class="tag">NLP + MACHINE LEARNING</p>
+                <h1>Find the roles that match your resume.</h1>
+                <p class="hero-text">
+                    Upload your resume and get a similarity-based screening result,
+                    extracted skills and recommended job roles.
+                </p>
+            </div>
+
+            <div class="hero-card">
+                <span>AI</span>
+                <strong>Resume Analysis</strong>
+                <small>TF-IDF • Cosine Similarity</small>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="upload-card">
+            <div>
+                <h2>Upload Resume</h2>
+                <p>Supported formats: PDF and DOCX</p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <label class="file-box">
+                    <input type="file" name="resume" accept=".pdf,.docx" required>
+                    <span>Choose a resume</span>
+                </label>
+
+                <button type="submit">Analyze Resume</button>
+            </form>
+        </section>
+
+        {% if result %}
+        <section class="results">
+
+            <div class="section-heading">
+                <div>
+                    <p class="tag">SCREENING COMPLETE</p>
+                    <h2>Resume Analysis</h2>
+                </div>
+                <span class="filename">{{ result.filename }}</span>
+            </div>
+
+            <div class="top-grid">
+                <div class="summary-card">
+                    <h3>Summary</h3>
+                    <p>{{ result.summary }}{% if result.summary|length >= 650 %}...{% endif %}</p>
+                </div>
+
+                <div class="score-card">
+                    <span>BEST MATCH</span>
+                    {% if result.best_match %}
+                        <strong>{{ result.best_match.role }}</strong>
+                        <div class="big-score">{{ result.best_match.match_score }}%</div>
+                        <small>{{ result.best_match.company }} • {{ result.best_match.location }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="panel">
+                    <div class="panel-title">
+                        <h3>Skills</h3>
+                        <span>{{ result.skills|length }}</span>
+                    </div>
+
+                    <div class="chips">
+                        {% for skill in result.skills %}
+                            <span>{{ skill }}</span>
+                        {% else %}
+                            <p>No matching skills found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">
+                        <h3>Keywords</h3>
+                        <span>{{ result.keywords|length }}</span>
+                    </div>
+
+                    <div class="chips">
+                        {% for keyword in result.keywords %}
+                            <span>{{ keyword }}</span>
+                        {% else %}
+                            <p>No keywords found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="recommendations">
+                <div class="section-heading">
+                    <div>
+                        <p class="tag">RECOMMENDED JOBS</p>
+                        <h2>Role Matches</h2>
+                    </div>
+                </div>
+
+                {% for job in result.jobs %}
+                <div class="job-card">
+                    <div class="job-info">
+                        <h3>{{ job.role }}</h3>
+                        <p>{{ job.company }} • {{ job.location }}</p>
+                    </div>
+
+                    <div class="job-score">
+                        <div class="progress">
+                            <div style="width: {{ job.match_score }}%"></div>
+                        </div>
+                        <strong>{{ job.match_score }}%</strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        AI Resume Screening & Job Recommendation System
+    </footer>
+</body>
+</html>
